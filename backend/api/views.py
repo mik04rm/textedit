@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from .models import Conversation, Document, Item
-from .serializers import ConversationSerializer, ItemSerializer, DocumentSerializer
+from .serializers import ConversationSerializer, ItemSerializer, DocumentSerializer, MessageSerializer
 
 
 class ItemsView(APIView):
