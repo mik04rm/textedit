@@ -6,11 +6,7 @@ import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import ChatCreator from '../Chat/ChatCreator';
 import ChatItem from '../Chat/ChatItem';
-
-interface Conversation {
-  id: number;
-  title: string;
-}
+import type { Conversation } from '@/types';
 
 interface ConversationPanelProps {
   onSelectConversation: (conv: Conversation) => void;

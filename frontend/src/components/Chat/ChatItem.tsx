@@ -8,11 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
-
-interface Conversation {
-  id: number;
-  title: string;
-}
+import type { Conversation } from '@/types';
 
 interface Props {
   conversation: Conversation;

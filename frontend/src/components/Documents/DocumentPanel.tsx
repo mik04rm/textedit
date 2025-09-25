@@ -3,17 +3,13 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useProject } from '@/stores/ProjectContext';
+import { useProject } from '@/hooks/useProject';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { useState } from 'react';
 import DocumentItem from './DocumentItem';
 import FileUploadModal from './FileUploadModal';
-
-interface Document {
-  id: number;
-  title: string;
-  content: string;
-}
+import DocumentEditor from './DocumentEditor';
+import type { Document } from '@/types';
 
 export default function DocumentPanel({
   onOpenChange,
@@ -82,16 +78,7 @@ export default function DocumentPanel({
             </ScrollArea>
           </>
         ) : (
-          <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-            <h2 className="font-semibold text-lg mb-2">{selectedDoc.title}</h2>
-            <ScrollArea className="flex-1 h-full">
-              <div className="p-1">
-                <p className="whitespace-pre-wrap text-sm">
-                  {selectedDoc.content || 'Brak treści...'}
-                </p>
-              </div>
-            </ScrollArea>
-          </div>
+          <DocumentEditor docId={selectedDoc.id} />
         )}
       </CardContent>
 
