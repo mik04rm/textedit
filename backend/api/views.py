@@ -2,8 +2,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from .models import Conversation, Document, Item
-from .serializers import ConversationSerializer, ItemSerializer, DocumentSerializer, MessageSerializer
+
+from llm.embedding import get_embedding_model
+from .models import QWEN3_EMBEDDING_8B_DIM, Conversation, Document, DocumentChunk, Item
+from .serializers import (
+    ConversationSerializer,
+    ItemSerializer,
+    DocumentSerializer,
+    MessageSerializer,
+)
+
+from vector_db.content import chunk_text
 
 
 class ItemsView(APIView):
@@ -37,3 +46,26 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
+
+    def perform_create(self, serializer):
+        print("debug: start")
+        # Save the document first
+        document = serializer.save()
+
+        chunks = chunk_text(document.content)
+
+        embedding_model = get_embedding_model()
+
+        print("debug: embedding_model")
+
+        assert (
+            len(embedding_model.embed_query("test")) == QWEN3_EMBEDDING_8B_DIM
+        ), "Embedding dimension mismatch"
+        # Save chunks
+        for index, chunk_content in enumerate(chunks):
+            DocumentChunk.objects.create(
+                document=document,
+                chunk_content=chunk_content,
+                chunk_index=index,
+                qwen3_embedding_8b=embedding_model.embed_query(chunk_content),
+            )
