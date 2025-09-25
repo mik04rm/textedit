@@ -1,11 +1,5 @@
 from rest_framework import serializers
-from .models import Conversation, Item, Message, Document
-
-
-class ItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Item
-        fields = "__all__"
+from .models import Conversation, Message, Document
 
 
 class MessageSerializer(serializers.ModelSerializer):

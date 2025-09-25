@@ -4,10 +4,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 
 from llm.embedding import get_embedding_model
-from .models import QWEN3_EMBEDDING_8B_DIM, Conversation, Document, DocumentChunk, Item
+from .models import QWEN3_EMBEDDING_8B_DIM, Conversation, Document, DocumentChunk
 from .serializers import (
     ConversationSerializer,
-    ItemSerializer,
     DocumentSerializer,
     MessageSerializer,
     RAGRequestSerializer,
@@ -16,20 +15,6 @@ from .serializers import (
 
 from rag.chunk_text import chunk_text
 from rag.graph import RAGState, rag_chain
-
-
-class ItemsView(APIView):
-    def get(self, request):
-        items = Item.objects.all()
-        serializer = ItemSerializer(items, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = ItemSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
