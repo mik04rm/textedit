@@ -10,9 +10,12 @@ from .serializers import (
     ItemSerializer,
     DocumentSerializer,
     MessageSerializer,
+    RAGRequestSerializer,
+    RAGResponseSerializer,
 )
 
-from vector_db.content import chunk_text
+from rag.chunk_text import chunk_text
+from rag.graph import RAGState, rag_chain
 
 
 class ItemsView(APIView):
@@ -48,20 +51,16 @@ class DocumentViewSet(viewsets.ModelViewSet):
     serializer_class = DocumentSerializer
 
     def perform_create(self, serializer):
-        print("debug: start")
-        # Save the document first
         document = serializer.save()
 
         chunks = chunk_text(document.content)
 
         embedding_model = get_embedding_model()
 
-        print("debug: embedding_model")
-
         assert (
             len(embedding_model.embed_query("test")) == QWEN3_EMBEDDING_8B_DIM
         ), "Embedding dimension mismatch"
-        # Save chunks
+
         for index, chunk_content in enumerate(chunks):
             DocumentChunk.objects.create(
                 document=document,
@@ -69,3 +68,29 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 chunk_index=index,
                 qwen3_embedding_8b=embedding_model.embed_query(chunk_content),
             )
+
+
+class RAGAskAPIView(APIView):
+    def post(self, request):
+        serializer = RAGRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+        assert isinstance(validated_data, dict)  # TODO find some better stubs?
+
+        state: RAGState = {
+            "question": validated_data["question"],
+            "doc_ids": validated_data.get("doc_ids"),
+            "top_k": 1,  # TEMPORARY FOR TESTING
+            "docs": [],
+            "answer": "",
+        }
+
+        result = rag_chain.invoke(state)
+
+        response_data = {
+            "answer": result.get("answer", ""),
+            "sources": [d for d in result.get("docs", [])],
+        }
+
+        response_serializer = RAGResponseSerializer(response_data)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)

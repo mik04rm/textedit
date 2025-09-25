@@ -47,29 +47,29 @@ export default function Chat({ conversation }: ChatProps) {
     const userMsg: Message = await resUser.json();
     setMessages((prev) => [...prev, userMsg]);
 
-    // const resBot = await fetch('http://localhost:8000/ask', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({
-    //     question: input,
-    //     doc_ids: projectDocs.map((doc) => doc.id),
-    //     conversation_id: conversation.id,
-    //   }),
-    // });
+    const resBot = await fetch('http://localhost:8000/api/ask/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: input,
+        doc_ids: projectDocs.map((doc) => doc.id),
+        conversation_id: conversation.id,
+      }),
+    });
 
-    // const data = await resBot.json();
+    const data = await resBot.json();
 
-    // const resBotMsg = await fetch(
-    //   `http://localhost:8000/conversation/${conversation.id}/messages`,
-    //   {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ role: 'bot', content: data.answer }),
-    //   },
-    // );
+    const resBotMsg = await fetch(
+      `http://localhost:8000/api/conversations/${conversation.id}/add_message/`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'bot', content: data.answer }),
+      },
+    );
 
-    // const botMsg: Message = await resBotMsg.json();
-    // setMessages((prev) => [...prev, botMsg]);
+    const botMsg: Message = await resBotMsg.json();
+    setMessages((prev) => [...prev, botMsg]);
 
     setInput('');
   };

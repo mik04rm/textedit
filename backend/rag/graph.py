@@ -1,24 +1,30 @@
 from langgraph.graph import StateGraph, END
 from typing import TypedDict, List, Tuple
 from langchain.schema import Document, HumanMessage
+from llm.embedding import get_embedding_model
 from llm.model import get_llm
-from vector_db.retriever import get_retriever
 from rag.prompt import build_generation_prompt
+from api.models import DocumentChunk
+from pgvector.django import CosineDistance
 
 llm = get_llm()
+embedding_model = get_embedding_model()
 
 
 class RAGState(TypedDict):
     question: str
-    docs: List[Document]
+    docs: List[str]
     answer: str
     doc_ids: List[int] | None
     top_k: int
 
 
 def retrieve_node(state: RAGState):
-    retriever = get_retriever(doc_ids=state.get("doc_ids"), top_k=state.get("top_k"))
-    docs = retriever.invoke(state["question"])
+
+    question_embedding = embedding_model.embed_query(state["question"])
+    docs = DocumentChunk.objects.order_by(
+        CosineDistance("qwen3_embedding_8b", question_embedding)
+    )[: state["top_k"]].values_list("chunk_content", flat=True)
     return {"docs": docs}
 
 
