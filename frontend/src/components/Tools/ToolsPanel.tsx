@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
-import { Conversation } from '../Chat/Chat';
 import ConversationPanel from './ConversationPanel';
+import type { Conversation } from '@/types';
 
 interface ToolsPanelProps {
   onSelectConversation: (conv: Conversation) => void;

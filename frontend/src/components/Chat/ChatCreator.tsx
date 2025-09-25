@@ -4,11 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
-
-interface Conversation {
-  id: number;
-  title: string;
-}
+import type { Conversation } from '@/types';
 
 export default function ChatCreator({
   onCreate,

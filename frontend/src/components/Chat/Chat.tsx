@@ -3,21 +3,10 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { useProject } from '@/stores/ProjectContext';
+import { useProject } from '@/hooks/useProject';
 import { ArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
-export interface Conversation {
-  id: number;
-  title: string;
-}
-
-interface Message {
-  id: number;
-  content: string;
-  role: 'user' | 'bot';
-  created_at?: string;
-}
+import type { Conversation, Message } from '@/types';
 
 interface ChatProps {
   conversation: Conversation | null;

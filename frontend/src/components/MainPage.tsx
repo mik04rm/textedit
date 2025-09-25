@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import Chat, { Conversation } from './Chat/Chat';
+import Chat from './Chat/Chat';
 import DocumentPanel from './Documents/DocumentPanel';
 import ToolsPanel from './Tools/ToolsPanel';
+import type { Conversation } from '@/types';
 
 export default function MainPage() {
   const [docOpen, setDocOpen] = useState(false);

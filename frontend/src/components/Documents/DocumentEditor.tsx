@@ -1,38 +1,54 @@
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from '@/components/ui/resizable';
-import Chat from '../Chat/Chat';
-import EditorBlock from '../Editor/Editor';
+'use client';
 
-export default function DocumentEditor({
-  selectedDocId,
-}: {
-  selectedDocId: number | null;
-}) {
-  if (!selectedDocId) {
-    return (
-      <div className="flex-1 flex items-center justify-center text-gray-500">
-        Wybierz dokument z listy
-      </div>
+import { useState, useEffect } from 'react';
+import { useProject } from '@/hooks/useProject';
+import { Button } from '@/components/ui/button';
+import Editor from '../Editor/Editor';
+import { Input } from '../ui/input';
+
+interface DocumentEditorProps {
+  docId: number;
+}
+
+export default function DocumentEditor({ docId }: DocumentEditorProps) {
+  const { projectDocs, setProjectDocs } = useProject();
+  const doc = projectDocs.find((d) => d.id === docId);
+
+  const [title, setTitle] = useState(doc?.title || '');
+  const [content, setContent] = useState(doc?.content || '');
+
+  useEffect(() => {
+    if (doc) {
+      setTitle(doc.title);
+      setContent(doc.content);
+    }
+  }, [doc]);
+
+  const saveDoc = async () => {
+    if (!doc) return;
+
+    const updatedDoc = { ...doc, title, content };
+
+    await fetch(`http://127.0.0.1:8000/api/documents/${doc.id}/`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedDoc),
+    });
+
+    setProjectDocs((prev) =>
+      prev.map((d) => (d.id === doc.id ? updatedDoc : d)),
     );
-  }
+  };
+
+  if (!doc) return <p>Dokument does not exists.</p>;
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="flex-1 flex h-full">
-      <ResizablePanel
-        defaultSize={70}
-        className="flex flex-col border-r p-4 h-full"
-      >
-        <EditorBlock docId={selectedDocId} />
-      </ResizablePanel>
-
-      <ResizableHandle withHandle />
-
-      <ResizablePanel defaultSize={30} className="flex flex-col h-full p-4">
-        <Chat />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+    <div className="flex flex-col h-full">
+      <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+      <Editor content={content} onChange={setContent} />
+      <Button onClick={saveDoc} className="mt-2">
+        Zapisz
+      </Button>
+    </div>
   );
 }

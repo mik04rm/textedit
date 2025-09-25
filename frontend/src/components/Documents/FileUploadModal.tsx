@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { useProject } from '@/stores/ProjectContext';
+import { useProject } from '@/hooks/useProject';
 import { useState } from 'react';
 
 type FileUploadModalProps = {

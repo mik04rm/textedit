@@ -8,12 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import { Button } from '../ui/button';
-
-interface Document {
-  id: number;
-  title: string;
-  content: string;
-}
+import type { Document } from '@/types';
 
 interface Props {
   document: Document;
