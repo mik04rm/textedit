@@ -38,7 +38,13 @@ class RAGRequestSerializer(serializers.Serializer):
         child=serializers.IntegerField(), required=False, allow_empty=True
     )
 
+class SourceSerializer(serializers.Serializer):
+    document_id = serializers.IntegerField()
+    document_title = serializers.CharField()
+    chunk_index = serializers.IntegerField()
+    start_pos = serializers.IntegerField()
+    end_pos = serializers.IntegerField()
 
 class RAGResponseSerializer(serializers.Serializer):
     answer = serializers.CharField()
-    sources = serializers.ListField(child=serializers.CharField())
+    sources = SourceSerializer(many=True)

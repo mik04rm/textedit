@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import type { Conversation } from '@/types';
+import { Trash, SquarePen } from 'lucide-react';
 
 interface Props {
   conversation: Conversation;
@@ -41,10 +42,10 @@ export default function ChatItem({
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem onClick={() => onEdit(conversation)}>
-            Change name
+            <SquarePen /> Change name
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onDelete(conversation)}>
-            Delete
+            <Trash /> Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

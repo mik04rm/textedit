@@ -1,4 +1,4 @@
-import { ProjectProvider } from '@/stores/ProjectContext';
+import { DocumentProvider } from '@/stores/DocumentContext';
 import './globals.css';
 
 export default function RootLayout({
@@ -9,7 +9,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ProjectProvider>{children}</ProjectProvider>
+        <DocumentProvider>{children}</DocumentProvider>
       </body>
     </html>
   );

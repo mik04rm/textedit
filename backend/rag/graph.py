@@ -13,7 +13,7 @@ embedding_model = get_embedding_model()
 
 class RAGState(TypedDict):
     question: str
-    docs: List[str]
+    docs: List[DocumentChunk]
     answer: str
     doc_ids: List[int] | None
     top_k: int
@@ -22,9 +22,17 @@ class RAGState(TypedDict):
 def retrieve_node(state: RAGState):
 
     question_embedding = embedding_model.embed_query(state["question"])
-    docs = DocumentChunk.objects.order_by(
-        CosineDistance("qwen3_embedding_8b", question_embedding)
-    )[: state["top_k"]].values_list("chunk_content", flat=True)
+
+    qs = DocumentChunk.objects.all()
+    if state.get("doc_ids"):
+        qs = qs.filter(document_id__in=state["doc_ids"])
+
+    docs = list(
+        qs.order_by(
+            CosineDistance("qwen3_embedding_8b", question_embedding)
+        )[: state["top_k"]]
+    )
+
     return {"docs": docs}
 
 
@@ -32,12 +40,14 @@ def generate_node(state: RAGState):
     if not state["docs"]:
         answer = "I didn't find relevant information in documents."
     else:
-        doc_prompt = build_generation_prompt(state["question"], state["docs"])
+        doc_texts = [d.chunk_content for d in state["docs"]]
+        doc_prompt = build_generation_prompt(state["question"], doc_texts)
         messages = [HumanMessage(content=doc_prompt)]
         answer_message = llm.invoke(messages)
         answer = answer_message.content
 
     return {"answer": answer}
+
 
 
 workflow = StateGraph(RAGState)

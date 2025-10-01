@@ -5,11 +5,13 @@ import Chat from './Chat/Chat';
 import DocumentPanel from './Documents/DocumentPanel';
 import ToolsPanel from './Tools/ToolsPanel';
 import type { Conversation } from '@/types';
+import { useDocuments } from '@/hooks/useDocuments';
 
 export default function MainPage() {
-  const [docOpen, setDocOpen] = useState(false);
   const [selectedConversation, setSelectedConversation] =
     useState<Conversation | null>(null);
+
+  const { isDocPanelOpen } = useDocuments();
 
   return (
     <div className="flex flex-col h-screen w-screen">
@@ -20,10 +22,10 @@ export default function MainPage() {
       <div className="flex flex-1 h-full transition-all duration-300">
         <div
           className={`p-2 flex h-full flex-col transition-all duration-300 ${
-            docOpen ? 'w-1/3' : 'w-1/4'
+            isDocPanelOpen ? 'w-1/3' : 'w-1/4'
           }`}
         >
-          <DocumentPanel onOpenChange={setDocOpen} />
+          <DocumentPanel />
         </div>
 
         <div className="p-2 w-1/2 flex flex-col h-full">

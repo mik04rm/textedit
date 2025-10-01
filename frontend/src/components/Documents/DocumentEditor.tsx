@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useProject } from '@/hooks/useProject';
+import { useDocuments } from '@/hooks/useDocuments';
 import { Button } from '@/components/ui/button';
 import Editor from '../Editor/Editor';
 import { Input } from '../ui/input';
@@ -11,7 +11,7 @@ interface DocumentEditorProps {
 }
 
 export default function DocumentEditor({ docId }: DocumentEditorProps) {
-  const { projectDocs, setProjectDocs } = useProject();
+  const { projectDocs, setProjectDocs } = useDocuments();
   const doc = projectDocs.find((d) => d.id === docId);
 
   const [title, setTitle] = useState(doc?.title || '');

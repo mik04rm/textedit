@@ -3,32 +3,29 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useProject } from '@/hooks/useProject';
+import { useDocuments } from '@/hooks/useDocuments';
 import { ArrowLeft, Plus } from 'lucide-react';
 import { useState } from 'react';
 import DocumentItem from './DocumentItem';
 import FileUploadModal from './FileUploadModal';
 import DocumentEditor from './DocumentEditor';
 import type { Document } from '@/types';
+import { HighlightedText } from './HighlightedText';
+import { Checkbox } from '../ui/checkbox';
 
-export default function DocumentPanel({
-  onOpenChange,
-}: {
-  onOpenChange: (isOpen: boolean) => void;
-}) {
-  const { projectDocs, setProjectDocs } = useProject();
-  const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
+export default function DocumentPanel() {
+  const {
+    projectDocs,
+    setProjectDocs,
+    selectedDoc,
+    setSelectedDoc,
+    openDoc,
+    closeDoc,
+    selectedDocs,
+    toggleDocSelection,
+  } = useDocuments();
+
   const [isFileModalOpen, setIsFileModalOpen] = useState(false);
-
-  const openDoc = (doc: Document) => {
-    setSelectedDoc(doc);
-    onOpenChange(true);
-  };
-
-  const closeDoc = () => {
-    setSelectedDoc(null);
-    onOpenChange(false);
-  };
 
   const handleDelete = async (doc: Document) => {
     await fetch(`http://localhost:8000/api/documents/${doc.id}/`, {
@@ -65,20 +62,52 @@ export default function DocumentPanel({
             </div>
 
             <ScrollArea className="flex-1">
-              <div className="flex flex-col gap-2">
-                {projectDocs.map((doc) => (
-                  <DocumentItem
-                    key={doc.id}
-                    document={doc}
-                    onSelect={openDoc}
-                    onDelete={handleDelete}
+              {projectDocs.map((doc) => (
+                <div key={doc.id} className="flex items-center gap-3">
+                  <Checkbox
+                    id={`doc-${doc.id}`}
+                    checked={selectedDocs.some((d) => d.id === doc.id)}
+                    onCheckedChange={() => toggleDocSelection(doc)}
                   />
-                ))}
-              </div>
+                  <div className="flex-1">
+                    <DocumentItem
+                      doc={doc}
+                      onSelect={openDoc}
+                      onDelete={handleDelete}
+                    />
+                  </div>
+                </div>
+              ))}
             </ScrollArea>
           </>
         ) : (
-          <DocumentEditor docId={selectedDoc.id} />
+          <div className="flex flex-col h-full">
+            {!selectedDoc.isEditing ? (
+              <ScrollArea className="p-2 flex-1 overflow-y-auto">
+                <Button
+                  className="mt-2"
+                  onClick={() =>
+                    setSelectedDoc({ ...selectedDoc, isEditing: true })
+                  }
+                >
+                  Edit
+                </Button>
+                <h2 className="font-bold mb-2">{selectedDoc.title}</h2>
+                {selectedDoc.highlightRange ? (
+                  <HighlightedText
+                    text={selectedDoc.content}
+                    range={selectedDoc.highlightRange}
+                  />
+                ) : (
+                  <p className="break-words whitespace-pre-wrap">
+                    {selectedDoc.content}
+                  </p>
+                )}
+              </ScrollArea>
+            ) : (
+              <DocumentEditor docId={selectedDoc.id} />
+            )}
+          </div>
         )}
       </CardContent>
 

@@ -46,12 +46,14 @@ class DocumentViewSet(viewsets.ModelViewSet):
             len(embedding_model.embed_query("test")) == QWEN3_EMBEDDING_8B_DIM
         ), "Embedding dimension mismatch"
 
-        for index, chunk_content in enumerate(chunks):
+        for index, chunk in enumerate(chunks):
             DocumentChunk.objects.create(
                 document=document,
-                chunk_content=chunk_content,
+                chunk_content=chunk["content"],
                 chunk_index=index,
-                qwen3_embedding_8b=embedding_model.embed_query(chunk_content),
+                start_pos=chunk["start_pos"],
+                end_pos=chunk['end_pos'],
+                qwen3_embedding_8b=embedding_model.embed_query(chunk["content"]),
             )
 
 
@@ -72,9 +74,19 @@ class RAGAskAPIView(APIView):
 
         result = rag_chain.invoke(state)
 
+        sources = []
+        for d in result.get("docs", []):
+            sources.append({
+                "document_id": d.document.id,
+                "document_title": d.document.title,
+                "chunk_index": d.chunk_index,
+                "start_pos": d.start_pos,
+                "end_pos": d.end_pos,
+            })
+
         response_data = {
-            "answer": result.get("answer", ""),
-            "sources": [d for d in result.get("docs", [])],
+          "answer": result.get("answer", ""),
+          "sources": sources,
         }
 
         response_serializer = RAGResponseSerializer(response_data)

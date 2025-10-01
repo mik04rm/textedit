@@ -36,6 +36,8 @@ class DocumentChunk(models.Model):
         dimensions=QWEN3_EMBEDDING_8B_DIM,
         help_text="Vector embeddings (qwen3_embedding_8b) of the chunk text",
     )
+    start_pos = models.IntegerField(null=True)
+    end_pos = models.IntegerField(null=True)
 
     class Meta:
         unique_together = ("document", "chunk_index")

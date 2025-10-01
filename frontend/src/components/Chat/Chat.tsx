@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { useProject } from '@/hooks/useProject';
+import { useDocuments } from '@/hooks/useDocuments';
 import { ArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { Conversation, Message } from '@/types';
@@ -16,7 +16,7 @@ export default function Chat({ conversation }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
 
-  const { projectDocs } = useProject();
+  const { selectedDocs, openDoc } = useDocuments();
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -35,6 +35,11 @@ export default function Chat({ conversation }: ChatProps) {
   const sendMessage = async () => {
     if (!input.trim() || !conversation) return;
 
+    console.log(
+      'Selected doc IDs being sent:',
+      selectedDocs.map((doc) => doc.id),
+    );
+
     const resUser = await fetch(
       `http://localhost:8000/api/conversations/${conversation.id}/add_message/`,
       {
@@ -52,7 +57,7 @@ export default function Chat({ conversation }: ChatProps) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         question: input,
-        doc_ids: projectDocs.map((doc) => doc.id),
+        doc_ids: selectedDocs.map((doc) => doc.id),
         conversation_id: conversation.id,
       }),
     });
@@ -64,12 +69,16 @@ export default function Chat({ conversation }: ChatProps) {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: 'bot', content: data.answer }),
+        body: JSON.stringify({
+          role: 'bot',
+          content: data.answer,
+          sources: data.sources,
+        }),
       },
     );
 
     const botMsg: Message = await resBotMsg.json();
-    setMessages((prev) => [...prev, botMsg]);
+    setMessages((prev) => [...prev, { ...botMsg, sources: data.sources }]);
 
     setInput('');
   };
@@ -90,6 +99,34 @@ export default function Chat({ conversation }: ChatProps) {
               }`}
             >
               <b>{msg.role}:</b> {msg.content}
+              {msg.role === 'bot' && msg.sources && msg.sources.length > 0 && (
+                <div className="mt-1 text-sm text-gray-500">
+                  Sources:
+                  {msg.sources.map((src, idx) => (
+                    <div
+                      key={idx}
+                      className="ml-4 cursor-pointer text-blue-500 hover:underline"
+                      onClick={() => {
+                        const doc = selectedDocs.find(
+                          (d) => d.id === src.document_id,
+                        );
+                        if (doc) {
+                          openDoc({
+                            ...doc,
+                            highlightRange: {
+                              start: src.start_pos,
+                              end: src.end_pos,
+                            },
+                          });
+                        }
+                      }}
+                    >
+                      {src.document_title}: chunk {src.chunk_index} (
+                      {src.start_pos}-{src.end_pos})
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

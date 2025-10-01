@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { useProject } from '@/hooks/useProject';
+import { useDocuments } from '@/hooks/useDocuments';
 import { useState } from 'react';
 
 type FileUploadModalProps = {
@@ -21,7 +21,7 @@ export default function FileUploadModal({
   isOpen,
   onClose,
 }: FileUploadModalProps) {
-  const { projectDocs, setProjectDocs } = useProject();
+  const { projectDocs, setProjectDocs } = useDocuments();
   const [file, setFile] = useState<File | null>(null);
 
   const handleUpload = async () => {
@@ -34,8 +34,12 @@ export default function FileUploadModal({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, content: text }),
     });
-
+    if (!res.ok) {
+      console.error('Upload failed', res.status, await res.text());
+      return;
+    }
     const data = await res.json();
+
     setProjectDocs([...projectDocs, data]);
     setFile(null);
     onClose();
