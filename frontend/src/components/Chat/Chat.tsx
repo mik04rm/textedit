@@ -5,43 +5,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useDocuments } from '@/hooks/useDocuments';
 import { ArrowUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { Conversation, Message } from '@/types';
+import { useState } from 'react';
+import type { Message } from '@/types';
+import { useConversation } from '@/hooks/useConversations';
 
-interface ChatProps {
-  conversation: Conversation | null;
-}
-
-export default function Chat({ conversation }: ChatProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+export default function Chat() {
+  const { selectedConversation, messages, setMessages, createConversation } =
+    useConversation();
+  const { selectedDocs, openDoc } = useDocuments();
   const [input, setInput] = useState('');
 
-  const { selectedDocs, openDoc } = useDocuments();
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (!conversation) return;
-
-      const res = await fetch(
-        `http://localhost:8000/api/conversations/${conversation.id}`,
-      );
-      const data = await res.json();
-      setMessages(data.messages || []);
-    };
-
-    fetchMessages();
-  }, [conversation]);
-
   const sendMessage = async () => {
-    if (!input.trim() || !conversation) return;
+    if (!input.trim()) return;
 
-    console.log(
-      'Selected doc IDs being sent:',
-      selectedDocs.map((doc) => doc.id),
-    );
+    let conv = selectedConversation;
+
+    if (!conv) {
+      conv = await createConversation(input.slice(0, 20));
+    }
 
     const resUser = await fetch(
-      `http://localhost:8000/api/conversations/${conversation.id}/add_message/`,
+      `http://localhost:8000/api/conversations/${conv.id}/add_message/`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,14 +42,14 @@ export default function Chat({ conversation }: ChatProps) {
       body: JSON.stringify({
         question: input,
         doc_ids: selectedDocs.map((doc) => doc.id),
-        conversation_id: conversation.id,
+        conversation_id: conv.id,
       }),
     });
 
     const data = await resBot.json();
 
     const resBotMsg = await fetch(
-      `http://localhost:8000/api/conversations/${conversation.id}/add_message/`,
+      `http://localhost:8000/api/conversations/${conv.id}/add_message/`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

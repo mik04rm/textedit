@@ -1,4 +1,5 @@
 import { DocumentProvider } from '@/stores/DocumentContext';
+import { ConversationProvider } from '@/stores/ConversationContext';
 import './globals.css';
 
 export default function RootLayout({
@@ -9,7 +10,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <DocumentProvider>{children}</DocumentProvider>
+        <DocumentProvider>
+          <ConversationProvider>{children}</ConversationProvider>
+        </DocumentProvider>
       </body>
     </html>
   );

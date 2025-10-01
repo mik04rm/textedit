@@ -3,43 +3,32 @@
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import ChatCreator from '../Chat/ChatCreator';
 import ChatItem from '../Chat/ChatItem';
 import type { Conversation } from '@/types';
+import { useConversation } from '@/hooks/useConversations';
 
-interface ConversationPanelProps {
-  onSelectConversation: (conv: Conversation) => void;
-  onCreateConversation: (conv: Conversation) => void;
-}
-
-export default function ConversationPanel({
-  onSelectConversation,
-  onCreateConversation,
-}: ConversationPanelProps) {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+export default function ConversationPanel() {
+  const {
+    conversations,
+    setConversations,
+    selectedConversation,
+    setSelectedConversation,
+    setMessages,
+  } = useConversation();
   const [showCreate, setShowCreate] = useState(false);
-
-  useEffect(() => {
-    const fetchConversations = async () => {
-      const res = await fetch('http://localhost:8000/api/conversations/');
-      const data = await res.json();
-      if (Array.isArray(data)) setConversations(data);
-    };
-    fetchConversations();
-  }, []);
-
-  const handleCreate = (conv: Conversation) => {
-    setConversations((prev) => [...prev, conv]);
-    onCreateConversation(conv);
-    setShowCreate(false);
-  };
 
   const handleDelete = async (conv: Conversation) => {
     await fetch(`http://localhost:8000/api/conversations/${conv.id}/`, {
       method: 'DELETE',
     });
     setConversations((prev) => prev.filter((c) => c.id !== conv.id));
+
+    if (selectedConversation?.id == conv.id) {
+      setSelectedConversation(null);
+      setMessages([]);
+    }
   };
 
   const handleEdit = async (conv: Conversation) => {
@@ -69,7 +58,7 @@ export default function ConversationPanel({
         </Button>
       </div>
 
-      {showCreate && <ChatCreator onCreate={handleCreate} />}
+      {showCreate && <ChatCreator />}
 
       <ScrollArea className="flex-1">
         <div className="flex flex-col gap-2">
@@ -77,7 +66,7 @@ export default function ConversationPanel({
             <ChatItem
               key={conv.id}
               conversation={conv}
-              onSelect={onSelectConversation}
+              onSelect={setSelectedConversation}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />

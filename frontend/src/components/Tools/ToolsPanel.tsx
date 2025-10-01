@@ -5,17 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import ConversationPanel from './ConversationPanel';
-import type { Conversation } from '@/types';
 
-interface ToolsPanelProps {
-  onSelectConversation: (conv: Conversation) => void;
-  onCreateConversation: (conv: Conversation) => void;
-}
-
-export default function ToolsPanel({
-  onSelectConversation,
-  onCreateConversation,
-}: ToolsPanelProps) {
+export default function ToolsPanel() {
   const [view, setView] = useState<'main' | 'conversations'>('main');
 
   return (
@@ -38,13 +29,10 @@ export default function ToolsPanel({
               Conversations
             </Button>
 
-            {/* inne narzędzia */}
+            {/* Tools */}
           </div>
         ) : (
-          <ConversationPanel
-            onSelectConversation={onSelectConversation}
-            onCreateConversation={onCreateConversation}
-          />
+          <ConversationPanel />
         )}
       </CardContent>
     </Card>

@@ -1,16 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import Chat from './Chat/Chat';
 import DocumentPanel from './Documents/DocumentPanel';
 import ToolsPanel from './Tools/ToolsPanel';
-import type { Conversation } from '@/types';
 import { useDocuments } from '@/hooks/useDocuments';
 
 export default function MainPage() {
-  const [selectedConversation, setSelectedConversation] =
-    useState<Conversation | null>(null);
-
   const { isDocPanelOpen } = useDocuments();
 
   return (
@@ -29,14 +24,11 @@ export default function MainPage() {
         </div>
 
         <div className="p-2 w-1/2 flex flex-col h-full">
-          <Chat conversation={selectedConversation} />
+          <Chat />
         </div>
 
         <div className="p-2 w-1/4 flex flex-col h-full">
-          <ToolsPanel
-            onSelectConversation={setSelectedConversation}
-            onCreateConversation={setSelectedConversation}
-          />
+          <ToolsPanel />
         </div>
       </div>
     </div>

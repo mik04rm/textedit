@@ -4,28 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
-import type { Conversation } from '@/types';
+import { useConversation } from '@/hooks/useConversations';
 
-export default function ChatCreator({
-  onCreate,
-}: {
-  onCreate: (conv: Conversation) => void;
-}) {
+export default function ChatCreator() {
   const [title, setTitle] = useState('');
+  const { createConversation } = useConversation();
 
-  const createConversation = async () => {
+  const handleCreate = async () => {
     if (!title.trim()) return;
 
-    const res = await fetch('http://localhost:8000/api/conversations/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title }),
-    });
-
-    if (res.ok) {
-      const conv = await res.json();
-      onCreate(conv);
+    try {
+      await createConversation(title);
       setTitle('');
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -40,7 +32,7 @@ export default function ChatCreator({
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Conversation title"
         />
-        <Button onClick={createConversation}>Create</Button>
+        <Button onClick={handleCreate}>Create</Button>
       </CardContent>
     </Card>
   );
